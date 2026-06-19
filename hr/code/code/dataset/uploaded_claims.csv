@@ -1,0 +1,28 @@
+"user_id","image_paths","user_claim","claim_object"
+"John_Doe","images/uploads/John_Doe/img_1.webp","My car rear bumper got dented in a parking lot | Support: Hi John Doe! 👋 I'm the ClaimVerify AI assistant. I see you'd like to file a **car** damage claim.
+
+You mentioned: *""My car rear bumper got dented in a parking lot""*
+
+Let me ask a few follow-up questions to help process your claim accurately. Can you tell me:
+
+1. **When did the damage occur?**
+2. **Which specific part is affected?**
+3. **Was anyone else involved (e.g. another vehicle, a delivery carrier)?** | Customer: It happened yesterday when I was shopping. The dent is on the rear bumper, left side | Support: I understand. Could you tell me more about the damage — specifically which part was affected and how severe it looks? This will help us process your claim faster.","car"
+"puk","images/uploads/puk/img_1.jpg","got damaged my car yesterday damage on the rear bumper | Support: Hi puk! 👋 I'm the ClaimVerify AI assistant. I see you'd like to file a **car** damage claim.
+
+You mentioned: *""got damaged my car yesterday damage on the rear bumper""*
+
+Let me ask a few follow-up questions to help process your claim accurately. Can you tell me:
+
+1. **When did the damage occur?**
+2. **Which specific part is affected?**
+3. **Was anyone else involved (e.g. another vehicle, a delivery carrier)?**","car"
+"dfgh","images/uploads/dfgh/img_1.jpg","yesterday my laptop got green screen when i have restared | Support: Hi dfgh! 👋 I'm the ClaimVerify AI assistant. I see you'd like to file a **laptop** damage claim.
+
+You mentioned: *""yesterday my laptop got green screen when i have restared""*
+
+Let me ask a few follow-up questions to help process your claim accurately. Can you tell me:
+
+1. **When did the damage occur?**
+2. **Which specific part is affected?**
+3. **Was anyone else involved (e.g. another vehicle, a delivery carrier)?** | Customer: yesterday when i restarted my laptop | Support: I am here to help you with your claim. Could you tell me more about the damage — specifically which part was affected and how severe it looks? This will help us process your claim faster. | Customer: scren of the laptop | Support: I am here to help you with your claim. Could you tell me more about the damage — specifically which part was affected and how severe it looks? This will help us process your claim faster.","laptop"

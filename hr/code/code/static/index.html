@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claim Verify — Damage Review Dashboard</title>
+<meta name="description" content="AI-powered damage claim verification dashboard."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#f7f9fb; --surface:#ffffff; --surface-lo:#f2f4f6; --surface-hi:#e6e8ea;
+  --border:#c6c6cd; --primary:#0f172a; --secondary:#515f74;
+  --success:#166534; --success-bg:#dcfce7; --success-ring:#bbf7d0;
+  --error:#ba1a1a; --error-bg:#fef2f2; --error-ring:#fecaca;
+  --warn:#b45309; --warn-bg:#fffbeb; --warn-ring:#fde68a;
+  --info:#1d4ed8; --info-bg:#eff6ff;
+  --radius:10px; --card-radius:12px;
+  --transition:200ms cubic-bezier(.4,0,.2,1);
+}
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--primary); min-height:100dvh; }
+button { cursor:pointer; font-family:inherit; border:none; background:none; }
+a { text-decoration:none; }
+.mono { font-family:'JetBrains Mono',monospace; }
+.ms { font-family:'Material Symbols Outlined'; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; font-style:normal; }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+/* ── scrollbar ── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* ── animations ── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+@keyframes slideIn  { from { transform:translateX(100%); } to { transform:none; } }
+@keyframes spin     { to { transform:rotate(360deg); } }
+@keyframes shimmer  { 0%,100% { opacity:.6; } 50% { opacity:1; } }
+@keyframes popIn    { 0% { transform:scale(.85); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+@keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+@keyframes countUp  { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+.fade-up    { animation:fadeUp var(--transition) both; }
+.slide-in   { animation:slideIn 280ms cubic-bezier(.4,0,.2,1) both; }
+.pop-in     { animation:popIn 200ms cubic-bezier(.34,1.56,.64,1) both; }
+.spin       { animation:spin .7s linear infinite; }
+.shimmer    { animation:shimmer 1.4s ease-in-out infinite; }
+
+/* ── skeleton ── */
+.skeleton { background:linear-gradient(90deg,var(--surface-hi) 25%,var(--surface-lo) 50%,var(--surface-hi) 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+
+/* ── cards ── */
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); transition:box-shadow var(--transition), transform var(--transition); }
+.card:hover { box-shadow:0 4px 20px rgba(0,0,0,.08); transform:translateY(-1px); }
+
+/* ── badges ── */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:999px; font-size:11px; font-weight:600; font-family:'JetBrains Mono',monospace; }
+.badge-success { background:var(--success-bg); color:var(--success); }
+.badge-error   { background:var(--error-bg);   color:var(--error); }
+.badge-warn    { background:var(--warn-bg);     color:var(--warn); }
+.badge-info    { background:var(--info-bg);     color:var(--info); }
+.badge-muted   { background:var(--surface-hi);  color:var(--secondary); }
+
+/* ── donut chart ── */
+.donut { width:120px; height:120px; border-radius:50%; position:relative; }
+.donut-ring { width:100%; height:100%; border-radius:50%; transition:background 600ms cubic-bezier(.4,0,.2,1); }
+.donut-hole { position:absolute; inset:20px; background:var(--bg); border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+
+/* ── filter pills ── */
+.pill { padding:6px 16px; border-radius:999px; font-size:12px; font-weight:600; transition:all var(--transition); border:1.5px solid transparent; white-space:nowrap; }
+.pill.active { background:var(--primary); color:#fff; }
+.pill:not(.active) { background:var(--surface); border-color:var(--border); color:var(--primary); }
+.pill:not(.active):hover { background:var(--surface-hi); }
+
+/* ── claim card ── */
+.claim-card { display:flex; align-items:stretch; background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); overflow:hidden; cursor:pointer; transition:all var(--transition); position:relative; }
+.claim-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.09); transform:translateY(-2px); }
+.claim-card:active { transform:scale(.985); }
+.claim-card .side-bar { width:4px; flex-shrink:0; }
+.claim-card .thumb { width:88px; min-height:88px; display:flex; align-items:center; justify-content:center; background:var(--surface-lo); flex-shrink:0; position:relative; overflow:hidden; }
+.claim-card .thumb .overlay { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-end; }
+.claim-card .thumb .overlay-tag { font-size:9px; font-weight:700; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-align:center; padding:3px 4px; }
+.claim-card .body { flex:1; padding:10px 12px; display:flex; flex-direction:column; gap:6px; min-width:0; }
+.claim-card .meta { display:flex; justify-content:space-between; align-items:flex-start; }
+.claim-card .excerpt { font-size:12px; color:var(--secondary); line-height:1.5; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.claim-card .footer { display:flex; align-items:center; justify-content:space-between; }
+
+/* ── tabs ── */
+.tab-bar { display:flex; border-bottom:1.5px solid var(--border); }
+.tab-btn { flex:1; padding:10px 4px; font-size:13px; font-weight:600; color:var(--secondary); text-align:center; border-bottom:2.5px solid transparent; margin-bottom:-1.5px; transition:all var(--transition); }
+.tab-btn.active { color:var(--primary); border-color:var(--primary); }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; animation:fadeUp 200ms both; }
+
+/* ── detail view ── */
+#detail-view { position:fixed; inset:0; background:var(--bg); z-index:100; overflow-y:auto; padding-bottom:100px; }
+
+/* ── refresh ring ── */
+.refresh-ring { position:relative; width:32px; height:32px; }
+.refresh-ring svg { position:absolute; inset:0; transform:rotate(-90deg); }
+.refresh-ring .track { stroke:var(--surface-hi); }
+.refresh-ring .prog  { stroke:var(--primary); stroke-dasharray:88; stroke-dashoffset:88; transition:stroke-dashoffset 1s linear; }
+
+/* ── toast ── */
+#toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:200; pointer-events:none; }
+.toast-inner { background:#1e293b; color:#fff; font-size:13px; padding:8px 18px; border-radius:999px; display:flex; align-items:center; gap:8px; box-shadow:0 4px 24px rgba(0,0,0,.2); white-space:nowrap; }
+
+/* ── progress bar ── */
+.progress-bar { height:4px; background:var(--surface-hi); border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:4px; transition:width 600ms cubic-bezier(.4,0,.2,1); }
+
+/* ── nav ── */
+nav.bottom { position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); height:60px; display:flex; justify-content:space-around; align-items:center; z-index:50; }
+nav.bottom a { display:flex; flex-direction:column; align-items:center; gap:2px; color:var(--secondary); font-size:11px; font-weight:500; padding:4px 12px; border-radius:8px; transition:color var(--transition); }
+nav.bottom a.active { color:var(--primary); }
+nav.bottom a .nav-pill { padding:2px 12px; border-radius:999px; transition:background var(--transition); }
+nav.bottom a.active .nav-pill { background:var(--surface-hi); }
+
+/* ── search ── */
+#search-bar { overflow:hidden; max-height:0; transition:max-height 300ms cubic-bezier(.4,0,.2,1); }
+#search-bar.open { max-height:60px; }
+#search-input { width:100%; border:1.5px solid var(--border); border-radius:999px; padding:8px 16px; font-size:14px; outline:none; transition:border-color var(--transition); }
+#search-input:focus { border-color:var(--primary); }
+
+/* ── stat card ── */
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--card-radius); padding:14px 16px; display:flex; flex-direction:column; gap:4px; transition:box-shadow var(--transition); }
+.stat-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); }
+.stat-val { font-size:32px; font-weight:700; line-height:1; transition:all 300ms; }
+.stat-label { font-size:10px; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--secondary); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ DASHBOARD ═══════════════ -->
+<div id="dashboard-view">
+
+  <!-- Header -->
+  <header style="position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <span class="ms" style="color:#fff;font-size:18px;">verified_user</span>
+      </div>
+      <div>
+        <h1 style="font-size:16px;font-weight:700;line-height:1;">Claim Verify</h1>
+        <p id="last-updated" style="font-size:10px;color:var(--secondary);font-family:'JetBrains Mono',monospace;">Loading…</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <!-- Refresh ring + button -->
+      <div style="display:flex;align-items:center;gap:4px;">
+        <div class="refresh-ring" title="Auto-refresh">
+          <svg viewBox="0 0 32 32" fill="none" stroke-width="3">
+            <circle class="track" cx="16" cy="16" r="14"/>
+            <circle id="refresh-prog" class="prog" cx="16" cy="16" r="14"/>
+          </svg>
+        </div>
+        <button id="refresh-btn" onclick="manualRefresh()" title="Refresh now" style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background var(--transition);" onmouseenter="this.style.background='var(--surface-hi)'" onmouseleave="this.style.background=''">
+          <span id="refresh-icon" class="ms" style="font-size:18px;">refresh</span>
+        </button>
+      </div>
+      <button id="run-nlp-btn" onclick="runNLP()" style="display:flex;align-items:center;gap:4px;background:var(--primary);color:#fff;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;transition:opacity var(--transition);gap:4px;">
+        <span class="ms" style="font-size:14px;">play_arrow</span> Run NLP
+      </button>
+      <button onclick="toggleSearch()" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background var(--transition);" onmouseenter="this.style.background='var(--surface-hi)'" onmouseleave="this.style.background=''">
+        <span class="ms" style="font-size:20px;">search</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search bar -->
+  <div id="search-bar" style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;overflow:hidden;max-height:0;transition:max-height 300ms,padding 300ms;">
+    <input id="search-input" type="text" placeholder="Search user ID, claim text, object type…" oninput="debouncedSearch()" style="width:100%;border:1.5px solid var(--border);border-radius:999px;padding:7px 16px;font-size:13px;outline:none;margin:8px 0;font-family:inherit;" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"/>
+  </div>
+
+  <main style="max-width:700px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px;padding-bottom:80px;">
+
+    <!-- Stats row -->
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+      <!-- Big stat + donut -->
+      <div class="stat-card fade-up" style="grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="flex:1;">
+          <span class="stat-label">Total Claims</span>
+          <div class="stat-val" id="stat-total" style="color:var(--primary);">—</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            <span class="badge badge-success" id="stat-sup-badge">— Supported</span>
+            <span class="badge badge-error" id="stat-con-badge">— Contradicted</span>
+            <span class="badge badge-warn" id="stat-nei-badge">— Insufficient</span>
+          </div>
+        </div>
+        <!-- Donut chart -->
+        <div style="position:relative;width:108px;height:108px;flex-shrink:0;">
+          <svg width="108" height="108" viewBox="0 0 108 108" style="transform:rotate(-90deg);">
+            <circle cx="54" cy="54" r="44" fill="none" stroke="var(--surface-hi)" stroke-width="16"/>
+            <circle id="donut-sup" cx="54" cy="54" r="44" fill="none" stroke="#166534" stroke-width="16" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" style="transition:stroke-dashoffset 800ms cubic-bezier(.4,0,.2,1);"/>
+            <circle id="donut-con" cx="54" cy="54" r="44" fill="none" stroke="#ba1a1a" stroke-width="16" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" style="transition:stroke-dashoffset 800ms cubic-bezier(.4,0,.2,1) 100ms;"/>
+            <circle id="donut-nei" cx="54" cy="54" r="44" fill="none" stroke="#b45309" stroke-width="16" stroke-dasharray="276.46" stroke-dashoffset="276.46" stroke-linecap="round" style="transition:stroke-dashoffset 800ms cubic-bezier(.4,0,.2,1) 200ms;"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <span id="donut-pct" style="font-size:20px;font-weight:700;line-height:1;"></span>
+            <span style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--secondary);letter-spacing:.06em;">SUP %</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flagged -->
+      <div class="stat-card fade-up" style="animation-delay:.05s">
+        <span class="stat-label" style="color:var(--error);display:flex;align-items:center;gap:4px;"><span class="ms" style="font-size:13px;">warning</span>Flagged</span>
+        <div class="stat-val" id="stat-flagged" style="color:var(--error);">—</div>
+        <div class="progress-bar" style="margin-top:4px;">
+          <div id="prog-flagged" class="progress-fill" style="background:var(--error);width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Review required -->
+      <div class="stat-card fade-up" style="animation-delay:.1s">
+        <span class="stat-label" style="color:var(--warn);">Review Req.</span>
+        <div class="stat-val" id="stat-review" style="color:var(--warn);">—</div>
+        <div class="progress-bar" style="margin-top:4px;">
+          <div id="prog-review" class="progress-fill" style="background:var(--warn);width:0%"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Filter pills -->
+    <section style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;">
+      <button id="pill-all"          class="pill active"     onclick="setFilter('all')">All (—)</button>
+      <button id="pill-supported"    class="pill"            onclick="setFilter('supported')">✓ Supported</button>
+      <button id="pill-contradicted" class="pill"            onclick="setFilter('contradicted')">✗ Contradicted</button>
+      <button id="pill-review"       class="pill"            onclick="setFilter('review')">⚠ Review Req.</button>
+      <button id="pill-nei"          class="pill"            onclick="setFilter('nei')">? Insufficient</button>
+    </section>
+
+    <!-- Claims list -->
+    <section>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--border);">
+        <h2 style="font-size:14px;font-weight:600;">Claims Queue <span id="claim-count" style="color:var(--secondary);font-weight:400;"></span></h2>
+        <span id="queue-label" style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--secondary);"></span>
+      </div>
+      <div id="claims-list" style="display:flex;flex-direction:column;gap:8px;padding-top:8px;"></div>
+    </section>
+  </main>
+
+  <!-- Bottom nav -->
+  <nav class="bottom">
+    <a href="#" class="active" id="nav-claims">
+      <div class="nav-pill"><span class="ms" style="font-size:20px;">assignment</span></div>
+      <span>Claims</span>
+    </a>
+    <a href="#" onclick="showReport();return false;" id="nav-reports">
+      <div class="nav-pill"><span class="ms" style="font-size:20px;">analytics</span></div>
+      <span>Reports</span>
+    </a>
+    <a href="#" id="nav-risk" onclick="setFilter('review');return false;">
+      <div class="nav-pill"><span class="ms" style="font-size:20px;">security</span></div>
+      <span>Risk</span>
+    </a>
+    <a href="/client" id="nav-client">
+      <div class="nav-pill"><span class="ms" style="font-size:20px;">person_add</span></div>
+      <span>Client</span>
+    </a>
+  </nav>
+</div>
+
+<!-- ═══════════════ DETAIL VIEW ═══════════════ -->
+<div id="detail-view" style="display:none;">
+  <header style="position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;height:56px;display:flex;align-items:center;gap:12px;">
+    <button onclick="closeDetail()" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background var(--transition);" onmouseenter="this.style.background='var(--surface-hi)'" onmouseleave="this.style.background=''">
+      <span class="ms">arrow_back</span>
+    </button>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--secondary);text-transform:uppercase;letter-spacing:.06em;">Claim Detail</div>
+      <div id="detail-title" style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    </div>
+    <div id="detail-header-badge"></div>
+  </header>
+
+  <div style="max-width:700px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px;padding-bottom:40px;">
+
+    <!-- Image zone -->
+    <div style="background:var(--surface-lo);border-radius:var(--card-radius);border:1px solid var(--border);height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+      <div id="detail-img-content" style="display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--secondary);">
+        <span class="ms" style="font-size:48px;opacity:.4;">image</span>
+        <span id="detail-img-label" style="font-size:12px;font-family:'JetBrains Mono',monospace;"></span>
+      </div>
+      <div id="detail-overlay" style="position:absolute;bottom:0;left:0;right:0;padding:6px;text-align:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card" style="overflow:hidden;">
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('verdict')" id="tab-verdict"><span class="ms" style="font-size:14px;vertical-align:-3px;">auto_awesome</span> Verdict</button>
+        <button class="tab-btn" onclick="switchTab('transcript')" id="tab-transcript"><span class="ms" style="font-size:14px;vertical-align:-3px;">chat</span> Transcript</button>
+        <button class="tab-btn" onclick="switchTab('risk')" id="tab-risk"><span class="ms" style="font-size:14px;vertical-align:-3px;">shield</span> Risk</button>
+      </div>
+
+      <!-- Verdict tab -->
+      <div id="panel-verdict" class="tab-panel active" style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:var(--surface-lo);border-radius:8px;padding:10px;">
+            <div class="stat-label">Issue Type</div>
+            <div id="d-issue" style="font-size:14px;font-weight:600;margin-top:4px;text-transform:capitalize;"></div>
+          </div>
+          <div style="background:var(--surface-lo);border-radius:8px;padding:10px;">
+            <div class="stat-label">Object Part</div>
+            <div id="d-part" style="font-size:14px;font-weight:600;margin-top:4px;text-transform:capitalize;"></div>
+          </div>
+          <div style="background:var(--surface-lo);border-radius:8px;padding:10px;">
+            <div class="stat-label">Severity</div>
+            <div id="d-sev" style="font-size:14px;font-weight:600;margin-top:4px;text-transform:capitalize;"></div>
+          </div>
+          <div style="background:var(--surface-lo);border-radius:8px;padding:10px;">
+            <div class="stat-label">Valid Image</div>
+            <div id="d-valid" style="font-size:14px;font-weight:600;margin-top:4px;"></div>
+          </div>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;display:flex;align-items:flex-start;gap:10px;">
+          <div style="flex:1;">
+            <div class="stat-label">Evidence Standard Met</div>
+            <p id="d-esm-reason" style="font-size:13px;color:var(--secondary);margin-top:4px;line-height:1.5;"></p>
+          </div>
+          <span id="d-esm" class="badge" style="flex-shrink:0;margin-top:2px;"></span>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;">
+          <div class="stat-label" style="margin-bottom:6px;display:flex;align-items:center;gap:4px;"><span class="ms" style="font-size:13px;">format_quote</span>Justification</div>
+          <p id="d-just" style="font-size:13px;color:var(--secondary);line-height:1.6;"></p>
+        </div>
+      </div>
+
+      <!-- Transcript tab -->
+      <div id="panel-transcript" class="tab-panel" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div id="d-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">User Claim</div>
+            <blockquote id="d-claim" style="font-size:14px;line-height:1.7;color:var(--primary);font-style:italic;border-left:3px solid var(--border);padding-left:12px;"></blockquote>
+          </div>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;">
+          <div class="stat-label" style="margin-bottom:6px;">Supporting Image IDs</div>
+          <div id="d-sup-imgs" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;">
+          <div class="stat-label" style="margin-bottom:8px;">Claim Object</div>
+          <div id="d-object" style="font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px;text-transform:capitalize;"></div>
+        </div>
+      </div>
+
+      <!-- Risk tab -->
+      <div id="panel-risk" class="tab-panel" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <div class="stat-label" style="margin-bottom:8px;">System Risk Flags</div>
+          <div id="d-flags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;">
+          <div class="stat-label" style="margin-bottom:8px;">User History</div>
+          <div id="d-history" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;"></div>
+        </div>
+        <div style="background:var(--surface-lo);border-radius:8px;padding:12px;">
+          <div class="stat-label" style="margin-bottom:6px;">History Summary</div>
+          <p id="d-hist-summary" style="font-size:13px;color:var(--secondary);line-height:1.5;font-style:italic;"></p>
+        </div>
+        <div id="d-hist-flags-row" style="display:none;">
+          <div class="stat-label" style="margin-bottom:6px;">History Flags</div>
+          <div id="d-hist-flags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button style="width:100%;background:#166534;color:#fff;border-radius:10px;padding:14px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity var(--transition);" onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'" onclick="showToast('Claim approved ✓','check_circle')">
+        <span class="ms" style="font-size:18px;">thumb_up</span> Approve Claim
+      </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:11px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:background var(--transition);" onmouseenter="this.style.background='var(--surface-hi)'" onmouseleave="this.style.background='var(--surface)'" onclick="showToast('Sent for manual review','person')">
+          <span class="ms" style="font-size:16px;">person</span> Manual
+        </button>
+        <button style="background:#fef2f2;color:#ba1a1a;border:1.5px solid #fecaca;border-radius:10px;padding:11px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity var(--transition);" onmouseenter="this.style.opacity='.8'" onmouseleave="this.style.opacity='1'" onclick="showToast('Claim rejected','block')">
+          <span class="ms" style="font-size:16px;">block</span> Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:200;pointer-events:none;opacity:0;transition:opacity 200ms;"></div>
+
+<script>
+// ══════════════════ STATE ══════════════════
+let allClaims = [], currentFilter = 'all', searchQuery = '';
+let searchTimer = null, refreshTimer = null, refreshCountdown = 30;
+let activeTab = 'verdict';
+
+// ══════════════════ BOOT ══════════════════
+async function boot() {
+  renderSkeletons();
+  await Promise.all([loadStats(), loadClaims()]);
+  startAutoRefresh();
+}
+
+// ══════════════════ DATA ══════════════════
+async function loadStats() {
+  try {
+    const s = await fetch('/api/stats').then(r => r.json());
+    const total = s.total || 0;
+
+    // Animated count-up
+    animateCount('stat-total',    0, total);
+    animateCount('stat-flagged',  0, s.flagged);
+    animateCount('stat-review',   0, s.review_required);
+
+    document.getElementById('stat-sup-badge').textContent = s.supported + ' Supported';
+    document.getElementById('stat-con-badge').textContent = s.contradicted + ' Contradicted';
+    document.getElementById('stat-nei-badge').textContent = s.not_enough_information + ' Insufficient';
+
+    // Progress bars
+    if (total > 0) {
+      setTimeout(() => {
+        document.getElementById('prog-flagged').style.width = (s.flagged / total * 100) + '%';
+        document.getElementById('prog-review').style.width  = (s.review_required / total * 100) + '%';
+      }, 300);
+    }
+
+    // Donut (circumference = 2π × 44 ≈ 276.46)
+    const C = 276.46;
+    const supFrac  = total ? s.supported / total : 0;
+    const conFrac  = total ? s.contradicted / total : 0;
+    const neiFrac  = total ? s.not_enough_information / total : 0;
+    const supDash  = C * supFrac;
+    const conDash  = C * conFrac;
+    const neiDash  = C * neiFrac;
+    const supRot   = 0;
+    const conRot   = supFrac * 360;
+    const neiRot   = (supFrac + conFrac) * 360;
+
+    setDonutSegment('donut-sup', supDash, C - supDash, supRot);
+    setDonutSegment('donut-con', conDash, C - conDash, conRot);
+    setDonutSegment('donut-nei', neiDash, C - neiDash, neiRot);
+    document.getElementById('donut-pct').textContent = total ? Math.round(supFrac * 100) + '%' : '—';
+
+    // Update pills
+    document.getElementById('pill-all').textContent          = `All (${total})`;
+    document.getElementById('pill-supported').textContent    = `✓ Supported (${s.supported})`;
+    document.getElementById('pill-contradicted').textContent = `✗ Contradicted (${s.contradicted})`;
+    document.getElementById('pill-review').textContent       = `⚠ Review Req. (${s.review_required})`;
+    document.getElementById('pill-nei').textContent          = `? Insufficient (${s.not_enough_information})`;
+
+    updateTimestamp();
+  } catch(e) { console.error(e); }
+}
+
+function setDonutSegment(id, dash, gap, rotateDeg) {
+  const el = document.getElementById(id);
+  el.style.strokeDasharray  = `${dash} ${gap}`;
+  el.style.strokeDashoffset = '0';
+  el.style.transform        = `rotate(${rotateDeg}deg)`;
+  el.style.transformOrigin  = '54px 54px';
+}
+
+async function loadClaims() {
+  try {
+    allClaims = await fetch('/api/claims').then(r => r.json());
+    renderClaims();
+  } catch(e) { console.error(e); }
+}
+
+// ══════════════════ RENDER ══════════════════
+const STATUS = {
+  supported:              { bar:'#166534', badgeClass:'badge-success', label:'Supported',    overlayBg:'rgba(22,101,52,.9)',  overlayText:'#fff', flag:'✓' },
+  contradicted:           { bar:'#ba1a1a', badgeClass:'badge-error',   label:'Contradicted', overlayBg:'rgba(186,26,26,.9)', overlayText:'#fff', flag:'✗' },
+  not_enough_information: { bar:'#b45309', badgeClass:'badge-warn',    label:'Insufficient', overlayBg:'rgba(180,83,9,.85)', overlayText:'#fff', flag:'?' },
+};
+const SEV_COLOR = { high:'#ba1a1a', medium:'#b45309', low:'#166534', none:'var(--secondary)', unknown:'var(--secondary)' };
+const OBJ_ICON  = { car:'directions_car', laptop:'laptop', package:'inventory_2' };
+
+function renderSkeletons() {
+  const el = document.getElementById('claims-list');
+  el.innerHTML = Array.from({length:6}, (_,i) => `
+    <div class="claim-card" style="animation-delay:${i*.05}s;pointer-events:none;">
+      <div class="side-bar skeleton" style="width:4px;height:88px;"></div>
+      <div class="thumb skeleton" style="width:88px;"></div>
+      <div class="body" style="gap:8px;">
+        <div class="skeleton" style="height:14px;width:60%;border-radius:6px;"></div>
+        <div class="skeleton" style="height:11px;width:90%;border-radius:6px;"></div>
+        <div class="skeleton" style="height:11px;width:70%;border-radius:6px;"></div>
+        <div class="skeleton" style="height:20px;width:80px;border-radius:999px;margin-top:2px;"></div>
+      </div>
+    </div>`).join('');
+}
+
+function filtered() {
+  return allClaims.filter(c => {
+    const q = searchQuery;
+    const matchSearch = !q || [c.user_id, c.user_claim, c.claim_object, c.issue_type, c.object_part].some(v => v.toLowerCase().includes(q));
+    const matchFilter =
+      currentFilter === 'all'           ? true :
+      currentFilter === 'supported'     ? c.claim_status === 'supported' :
+      currentFilter === 'contradicted'  ? c.claim_status === 'contradicted' :
+      currentFilter === 'nei'           ? c.claim_status === 'not_enough_information' :
+      currentFilter === 'review'        ? c.risk_flags.includes('manual_review_required') : true;
+    return matchSearch && matchFilter;
+  });
+}
+
+function renderClaims() {
+  const list = filtered();
+  document.getElementById('claim-count').textContent = `(${list.length})`;
+  document.getElementById('queue-label').textContent = searchQuery ? `"${searchQuery}"` : '';
+  const el = document.getElementById('claims-list');
+
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:48px 16px;color:var(--secondary);">
+      <span class="ms" style="font-size:40px;opacity:.4;">search_off</span>
+      <p style="margin-top:8px;font-size:14px;">No claims match this filter.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = list.map((c, i) => {
+    const st = STATUS[c.claim_status] || STATUS.not_enough_information;
+    const hasManip  = /possible_manipulation|text_instruction_present/.test(c.risk_flags);
+    const hasReview = c.risk_flags.includes('manual_review_required');
+    const overlayTag = hasManip ? ['FRAUD RISK','rgba(186,26,26,.92)'] : c.claim_status === 'contradicted' ? ['CONTRADICTION','rgba(186,26,26,.85)'] : hasReview ? ['AI FLAG','rgba(180,83,9,.88)'] : null;
+    const imgs = c.image_paths.split(';').length;
+    const icon = OBJ_ICON[c.claim_object] || 'help';
+    const sevColor = SEV_COLOR[c.severity] || 'var(--secondary)';
+
+    return `<div class="claim-card fade-up" style="animation-delay:${Math.min(i,.15)*0.04}s" onclick="openDetail(${i})">
+      <div class="side-bar" style="background:${st.bar};"></div>
+      <div class="thumb">
+        <span class="ms" style="font-size:36px;color:var(--border);z-index:1;">${icon}</span>
+        ${overlayTag ? `<div class="overlay"><div class="overlay-tag" style="background:${overlayTag[1]};color:#fff;">${overlayTag[0]}</div></div>` : ''}
+      </div>
+      <div class="body">
+        <div class="meta">
+          <span style="font-size:13px;font-weight:700;">${c.user_id}</span>
+          <span style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--secondary);text-transform:capitalize;">${c.claim_object}</span>
+        </div>
+        <p class="excerpt">${c.user_claim}</p>
+        <div class="footer">
+          <span class="badge ${st.badgeClass}">${st.flag} ${st.label}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;font-family:'JetBrains Mono',monospace;color:${sevColor};text-transform:capitalize;">${c.severity}</span>
+            <span style="font-size:10px;color:var(--secondary);font-family:'JetBrains Mono',monospace;">${imgs}img</span>
+            ${hasReview ? '<span class="ms" style="font-size:15px;color:var(--warn);">warning</span>' : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════ DETAIL ══════════════════
+function openDetail(idx) {
+  const list = filtered();
+  const c = list[idx];
+  if (!c) return;
+  const st = STATUS[c.claim_status] || STATUS.not_enough_information;
+  const esm = c.evidence_standard_met === 'true';
+  const sevColor = SEV_COLOR[c.severity] || 'var(--secondary)';
+
+  // Header
+  document.getElementById('detail-title').textContent = c.user_id + ' · ' + c.claim_object;
+  document.getElementById('detail-header-badge').innerHTML = `<span class="badge ${st.badgeClass}">${st.flag} ${st.label}</span>`;
+
+  // Image zone
+  document.getElementById('detail-img-label').textContent = c.image_paths.split(';').map(p=>p.trim().split('/').pop()).join(', ');
+  const ov = document.getElementById('detail-overlay');
+  ov.textContent = st.label;
+  ov.style.background = st.bar;
+  ov.style.color = '#fff';
+
+  // Verdict
+  document.getElementById('d-issue').textContent   = c.issue_type.replace(/_/g,' ');
+  document.getElementById('d-part').textContent    = c.object_part.replace(/_/g,' ');
+  document.getElementById('d-sev').textContent     = c.severity;
+  document.getElementById('d-sev').style.color     = sevColor;
+  document.getElementById('d-valid').textContent   = c.valid_image === 'true' ? '✓ Yes' : '✗ No';
+  document.getElementById('d-valid').style.color   = c.valid_image === 'true' ? 'var(--success)' : 'var(--error)';
+  document.getElementById('d-esm').textContent     = esm ? 'TRUE' : 'FALSE';
+  document.getElementById('d-esm').className       = 'badge ' + (esm ? 'badge-success' : 'badge-error');
+  document.getElementById('d-esm-reason').textContent = c.evidence_standard_met_reason || '—';
+  document.getElementById('d-just').textContent    = c.claim_status_justification || '—';
+
+  // Transcript
+  document.getElementById('d-avatar').textContent  = c.user_id.slice(0,2).toUpperCase();
+  document.getElementById('d-claim').textContent   = '"' + c.user_claim + '"';
+  const supImgs = c.supporting_image_ids.split(';').filter(Boolean);
+  document.getElementById('d-sup-imgs').innerHTML  = supImgs.map(s=>`<span class="badge badge-info">${s}</span>`).join('') || '<span style="font-size:12px;color:var(--secondary);">None</span>';
+  document.getElementById('d-object').innerHTML    = `<span class="ms" style="font-size:24px;">${OBJ_ICON[c.claim_object]||'help'}</span>${c.claim_object}`;
+
+  // Risk
+  const flags = c.risk_flags.split(';').filter(f=>f&&f!=='none');
+  const flagColors = {
+    manual_review_required:'badge-warn', possible_manipulation:'badge-error',
+    text_instruction_present:'badge-error', user_history_risk:'badge-warn',
+    non_original_image:'badge-error', claim_mismatch:'badge-error',
+  };
+  document.getElementById('d-flags').innerHTML = flags.length
+    ? flags.map(f=>`<span class="badge ${flagColors[f]||'badge-muted'}">${f.replace(/_/g,' ')}</span>`).join('')
+    : '<span class="badge badge-success">No risk flags</span>';
+
+  document.getElementById('d-history').innerHTML = `
+    <div style="background:var(--surface);border-radius:8px;padding:8px;">
+      <div style="font-size:18px;font-weight:700;">${c.past_claim_count}</div>
+      <div style="font-size:10px;color:var(--secondary);">Past</div>
+    </div>
+    <div style="background:var(--surface);border-radius:8px;padding:8px;">
+      <div style="font-size:18px;font-weight:700;color:var(--success);">${c.accept_claim}</div>
+      <div style="font-size:10px;color:var(--secondary);">Accepted</div>
+    </div>
+    <div style="background:var(--surface);border-radius:8px;padding:8px;">
+      <div style="font-size:18px;font-weight:700;color:var(--error);">${c.rejected_claim}</div>
+      <div style="font-size:10px;color:var(--secondary);">Rejected</div>
+    </div>`;
+  document.getElementById('d-hist-summary').textContent = c.history_summary || 'No additional history notes.';
+
+  if (c.history_flags && c.history_flags !== 'none') {
+    document.getElementById('d-hist-flags-row').style.display = 'block';
+    document.getElementById('d-hist-flags').innerHTML = c.history_flags.split(',').map(f=>`<span class="badge badge-warn">${f.trim()}</span>`).join('');
+  } else {
+    document.getElementById('d-hist-flags-row').style.display = 'none';
+  }
+
+  // Reset to first tab
+  switchTab('verdict');
+
+  const dv = document.getElementById('detail-view');
+  dv.style.display = 'block';
+  dv.classList.add('slide-in');
+  document.getElementById('dashboard-view').style.display = 'none';
+  setTimeout(() => dv.classList.remove('slide-in'), 300);
+}
+
+function closeDetail() {
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('dashboard-view').style.display = 'block';
+}
+
+// ══════════════════ TABS ══════════════════
+function switchTab(name) {
+  activeTab = name;
+  ['verdict','transcript','risk'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+    document.getElementById('panel-' + t).classList.toggle('active', t === name);
+  });
+}
+
+// ══════════════════ FILTER ══════════════════
+function setFilter(f) {
+  currentFilter = f;
+  ['all','supported','contradicted','review','nei'].forEach(k => {
+    document.getElementById('pill-'+k)?.classList.toggle('active', k === f);
+  });
+  renderClaims();
+}
+
+// ══════════════════ SEARCH ══════════════════
+function toggleSearch() {
+  const bar = document.getElementById('search-bar');
+  const open = bar.style.maxHeight === '60px';
+  bar.style.maxHeight = open ? '0' : '60px';
+  bar.style.padding   = open ? '0 16px' : '8px 16px';
+  if (!open) document.getElementById('search-input').focus();
+}
+function debouncedSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+    renderClaims();
+  }, 180);
+}
+
+// ══════════════════ AUTO REFRESH ══════════════════
+function startAutoRefresh() {
+  refreshCountdown = 30;
+  clearInterval(refreshTimer);
+  refreshTimer = setInterval(async () => {
+    refreshCountdown--;
+    updateRefreshRing();
+    if (refreshCountdown <= 0) {
+      refreshCountdown = 30;
+      await silentRefresh();
+    }
+  }, 1000);
+}
+function updateRefreshRing() {
+  const frac = refreshCountdown / 30;
+  const C = Math.PI * 2 * 14; // ≈ 87.96
+  document.getElementById('refresh-prog').style.strokeDashoffset = (C * (1 - frac)).toFixed(2);
+}
+async function silentRefresh() {
+  await Promise.all([loadStats(), loadClaims()]);
+}
+async function manualRefresh() {
+  const icon = document.getElementById('refresh-icon');
+  icon.classList.add('spin');
+  refreshCountdown = 30;
+  await silentRefresh();
+  icon.classList.remove('spin');
+  showToast('Refreshed', 'refresh');
+}
+function updateTimestamp() {
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+
+// ══════════════════ RUN NLP ══════════════════
+async function runNLP() {
+  const btn = document.getElementById('run-nlp-btn');
+  btn.innerHTML = '<span class="ms spin" style="font-size:14px;">hourglass_empty</span> Running…';
+  btn.disabled = true;
+  try {
+    const d = await fetch('/api/run/nlp', {method:'POST'}).then(r=>r.json());
+    if (d.ok) {
+      showToast('NLP engine complete ✓', 'check_circle');
+      await Promise.all([loadStats(), loadClaims()]);
+    } else {
+      showToast('Error: ' + d.error.slice(0,60), 'error');
+    }
+  } catch(e) { showToast('Request failed', 'error'); }
+  btn.innerHTML = '<span class="ms" style="font-size:14px;">play_arrow</span> Run NLP';
+  btn.disabled = false;
+}
+
+// ══════════════════ TOAST ══════════════════
+let toastTimer;
+function showToast(msg, icon = 'info') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<div class="toast-inner"><span class="ms" style="font-size:16px;">${icon}</span>${msg}</div>`;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+}
+function showReport() { showToast('Report → evaluation/evaluation_report.md', 'description'); }
+
+// ══════════════════ COUNT UP ══════════════════
+function animateCount(id, from, to, duration = 600) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = performance.now();
+  const diff = to - from;
+  function step(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + diff * ease);
+    el.style.animation = 'countUp 300ms both';
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// ══════════════════ KEYBOARD ══════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('detail-view').style.display !== 'none') { closeDetail(); return; }
+    const bar = document.getElementById('search-bar');
+    if (bar.style.maxHeight === '60px') { toggleSearch(); }
+  }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault(); toggleSearch();
+  }
+  if (e.key === 'r' && document.activeElement.tagName !== 'INPUT') {
+    manualRefresh();
+  }
+});
+
+// ══════════════════ INIT ══════════════════
+boot();
+</script>
+</body>
+</html>

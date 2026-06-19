@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Claim Review | Multi-Modal Evidence Review</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-container": "#38260b",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "primary-fixed": "#d2e4fb",
+                    "tertiary-fixed": "#feddb5",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f8f9ff",
+                    "outline-variant": "#c4c6cd",
+                    "inverse-primary": "#b7c8de",
+                    "surface-container-highest": "#d3e4fe",
+                    "tertiary-fixed-dim": "#e1c29b",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#281802",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#8192a7",
+                    "surface-container-high": "#dce9ff",
+                    "outline": "#74777d",
+                    "inverse-surface": "#213145",
+                    "secondary": "#006b5f",
+                    "on-primary-fixed-variant": "#38485a",
+                    "error": "#ba1a1a",
+                    "primary": "#041627",
+                    "on-background": "#0b1c30",
+                    "surface-container": "#e5eeff",
+                    "tertiary": "#211200",
+                    "surface-container-low": "#eff4ff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#62fae3",
+                    "primary-container": "#1a2b3c",
+                    "on-primary-fixed": "#0b1d2d",
+                    "on-secondary-fixed": "#00201c",
+                    "on-secondary-container": "#007165",
+                    "inverse-on-surface": "#eaf1ff",
+                    "surface-tint": "#4f6073",
+                    "secondary-fixed": "#62fae3",
+                    "on-surface": "#0b1c30",
+                    "on-secondary-fixed-variant": "#005047",
+                    "primary-fixed-dim": "#b7c8de",
+                    "on-surface-variant": "#44474c",
+                    "on-tertiary-fixed-variant": "#584326",
+                    "on-tertiary-container": "#a88c69",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#cbdbf5",
+                    "background": "#f8f9ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "gutter": "20px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "base": "4px",
+                    "xl": "32px",
+                    "margin": "24px",
+                    "sm": "8px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pt-[80px] pb-[100px] md:pb-lg antialiased font-body-md">
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md h-16 bg-surface dark:bg-primary border-b border-outline-variant dark:border-outline shadow-sm transition-all duration-200">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">Evidence Review</h1>
+</div>
+<div class="flex items-center gap-md">
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover shadow-sm" data-alt="A professional headshot of a corporate insurance adjuster in a well-lit, minimalist office setting. The individual projects unwavering confidence and analytical rigor. The lighting is soft but high-key, complementing a modern light-mode interface. The background is a stark, clean white or very light gray, ensuring the focus remains entirely on the subject, perfectly suited for a high-end enterprise platform avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBTet00P0eRSssFOoK4eTKxtM9ByuDoq7T5pJEXFG-3DL1xPkAcV1ug8VGeXmYoqMajfrdcSKc9Ewuo0EqhCXYEfi9BZjxINiKam3vr6X8S20xVOOFMmhehqCrlNpT6tbxScl1irl1Ipzlv6dC1O_-nyheuk1YdGmgxgxkKco-bDdyFMKxfm6CUC0feVeGhSPH7heEvjrxExKKFS0LC6wrYazg_Ridx_7iXPJ5KcA-nSDKpv8sa1_S0nZirwWkjXzJ6Hg4rZLsgGc"/>
+</div>
+</header>
+<main class="max-w-[1600px] mx-auto px-gutter md:px-xl">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-xl gap-md">
+<div>
+<div class="flex items-center gap-sm mb-xs">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Claim Review</span>
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-label-md text-label-md text-on-surface-variant">Vehicle</span>
+</div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary">CLM-992-B</h2>
+</div>
+<div class="flex gap-sm">
+<span class="inline-flex items-center gap-xs px-sm py-xs rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md border border-outline-variant">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                    Submitted 2h ago
+                </span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl">
+<div class="lg:col-span-8 flex flex-col gap-lg">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="relative w-full aspect-video bg-surface-container flex items-center justify-center overflow-hidden border-b border-outline-variant group">
+<img class="w-full h-full object-cover" data-alt="A high-resolution, clear photograph of a modern car's front bumper showing a distinct, deep scratch on the passenger side. The image is taken in a well-lit, clinical environment, perhaps an inspection bay, with bright, even white lighting typical of a high-end light-mode corporate aesthetic. The focus is sharp on the damage, highlighting the metallic paint texture and the contrast of the scratch. The overall composition is objective, professional, and analytical, suitable for rigorous insurance claims review." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBubEm0F25OE7nmgSOMt_BQJ2Eu-GmTXyiuOc9ytzhAtavqI-WMVcInwCCTeXIfDqonP3Fltgk-gB20BJT4NfU1pF8OPer4cDbEO7GlMF2uqShECfX7bGYlIZOfXRwF_tWV0V2AmAOCG15Ghdfkn199BlA76nkmt50S2DYLTzm6sOCxrPbd5Bq3BylSbKyLkTAL050d02dk0pilnGwFj7nxGUJ1qKkuJT5h9DaGvEqq30P1r7UKqI8VwZ4kY2TU0v7BXom57Bp02Mo"/>
+<div class="absolute top-md right-md flex gap-sm">
+<button class="bg-surface-container-lowest/90 backdrop-blur text-on-surface p-sm rounded-lg shadow-sm border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+<button class="bg-surface-container-lowest/90 backdrop-blur text-on-surface p-sm rounded-lg shadow-sm border border-outline-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+<div class="absolute bottom-md left-md bg-primary-container/90 backdrop-blur text-on-primary-container px-sm py-xs rounded-lg font-label-sm text-label-sm border border-outline-variant/20 flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">photo_camera</span>
+                            img_1.jpg
+                        </div>
+</div>
+<div class="p-sm flex gap-sm overflow-x-auto snap-x bg-surface-container-lowest">
+<button class="flex-shrink-0 w-24 h-16 rounded-lg border-2 border-secondary overflow-hidden relative snap-start">
+<img class="w-full h-full object-cover" data-alt="A wide-angle, objective photograph of a sleek silver car parked in a neutral, well-lit parking structure. The lighting is bright and even, casting soft shadows, aligning perfectly with a modern, high-contrast corporate light-mode UI style. The image serves as context for an insurance claim, emphasizing clarity and information density. The composition is sterile and professional, focusing purely on documenting the vehicle's position." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9Yn78FkF67hRdnnPmQuFmGlL03aWRRw47AUj8Cn7jambgRKUrMcPE7uV5TXvwgaJbCVhV2zYHsiVBeBGepQoh-_ThvrIMjK9kITyZcms5tfJ1ETc9drpQzrhTVwFP8q-To1ufbeWUhL_PWKZF7Wi2yHXWOaLvnnYMZCW87fYq9x5TnVw5gW4gabA4QVFomynBv1EScdNRW3Q5-awIOknTU0Qkx7IUl1pa2_xZDwEF7GFvX2joTTmbPPer8EGpSzgWL2L_sbhpSIc"/>
+</button>
+<button class="flex-shrink-0 w-24 h-16 rounded-lg border border-outline-variant overflow-hidden relative snap-start opacity-70 hover:opacity-100 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="An extreme close-up, high-precision macro shot of a metallic car surface revealing subtle paint abrasions. The lighting is harsh and analytical, designed to expose microscopic details for evidence review. The aesthetic matches a professional, rigorous corporate environment in light mode, utilizing stark whites and deep grays to maximize visual contrast and objective clarity. The image feels like a piece of irrefutable scientific evidence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4YTpralQri9qEGCq4GXPQRxXGMciy7Um8bi3WAT4FE-0eus-yY3Sfu_mTlTskglomgX31Kmzn8vS8axaUPrItzzjXzzBWCxtoT-36RDyNZITGonmMZyvqwY6RoewNuD8CB0-hAmxGuq8wdIxtFWHbhnXamjuQ4nFd3qzvENoOFnkQvIuP3303fOeUFfYmzRMl-2frScAPju3wHlhQgoif7jI0gNOHv7HqjHR7ZoZh2sDQkUo3HSlDvRFURAAa4jy0ryXwjS0RHBU"/>
+</button>
+<button class="flex-shrink-0 w-24 h-16 rounded-lg border border-outline-variant overflow-hidden relative snap-start opacity-70 hover:opacity-100 transition-opacity bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline">add_photo_alternate</span>
+</button>
+</div>
+</div>
+<div class="bg-surface-container border border-secondary/20 border-l-4 border-l-secondary rounded-xl shadow-sm p-lg relative overflow-hidden">
+<div class="absolute top-0 right-0 p-md opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[120px] text-secondary" style="font-variation-settings: 'FILL' 1;">psychiatry</span>
+</div>
+<div class="flex justify-between items-start mb-md relative z-10">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="font-headline-md text-headline-md text-primary">AI Verdict</h3>
+</div>
+<span class="inline-flex items-center gap-xs px-sm py-xs rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                            Supported
+                        </span>
+</div>
+<div class="grid grid-cols-2 gap-md mb-md relative z-10">
+<div class="bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-sm">
+<span class="block font-label-sm text-label-sm text-on-surface-variant mb-xs uppercase tracking-wide">Detected Issue</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Scratch / Surface Abrasion</span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/50 rounded-lg p-sm">
+<span class="block font-label-sm text-label-sm text-on-surface-variant mb-xs uppercase tracking-wide">Object Part</span>
+<span class="font-body-md text-body-md text-on-surface font-medium">Front Bumper (Passenger Side)</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest/60 border border-outline-variant/30 rounded-lg p-md relative z-10">
+<h4 class="font-label-md text-label-md text-primary mb-xs">Analysis Justification</h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            A clear surface scratch is visible on the passenger side of the front bumper in <span class="font-medium text-secondary">img_1.jpg</span>. The damage geometry and location perfectly align with the user's submitted claim transcript. No inconsistencies detected between visual evidence and reported incident.
+                        </p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col gap-md">
+<div class="bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl p-md">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-on-surface-variant">forum</span>
+<h3 class="font-headline-md text-headline-md text-primary text-[18px]">Claim Transcript</h3>
+</div>
+<div class="flex gap-md">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center flex-shrink-0 text-primary font-bold font-label-md text-label-md">
+                            JD
+                        </div>
+<div class="bg-surface-container-low border border-outline-variant/50 rounded-lg rounded-tl-none p-sm">
+<p class="font-body-md text-body-md text-on-surface italic">
+                                "I came back to my car after parking at the grocery store and found a big scratch on my front bumper. Someone must have scraped it while pulling out."
+                            </p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl p-md">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-on-surface-variant">policy</span>
+<h3 class="font-headline-md text-headline-md text-primary text-[18px]">Risk &amp; Context</h3>
+</div>
+<div class="flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">System Risk Flags</span>
+<span class="inline-flex items-center px-sm py-[2px] rounded-full bg-surface-container text-on-surface-variant font-label-md text-label-md border border-outline-variant">
+                                None Detected
+                            </span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant">User History</span>
+<div class="text-right">
+<span class="block font-label-md text-label-md text-on-surface font-medium">3 Past Claims</span>
+<span class="block font-label-sm text-label-sm text-secondary">100% Acceptance Rate</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl p-md">
+<div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+<span class="material-symbols-outlined text-on-surface-variant">checklist</span>
+<h3 class="font-headline-md text-headline-md text-primary text-[18px]">Evidence Requirements</h3>
+</div>
+<ul class="flex flex-col gap-sm">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Front bumper visibility</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Close-up of damage</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-outline-variant">radio_button_unchecked</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Contextual environmental shot</span>
+</li>
+</ul>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant shadow-sm rounded-xl p-md mt-auto lg:sticky lg:top-[88px]">
+<div class="flex flex-col gap-sm">
+<button class="w-full bg-secondary text-on-secondary font-label-md text-label-md py-sm rounded-lg shadow-sm hover:bg-secondary/90 transition-colors flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">thumb_up</span>
+                            Approve Claim
+                        </button>
+<div class="grid grid-cols-2 gap-sm">
+<button class="bg-surface text-primary border border-primary/20 font-label-md text-label-md py-sm rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">person_search</span>
+                                Manual
+                            </button>
+<button class="bg-error-container/20 text-error border border-error/30 font-label-md text-label-md py-sm rounded-lg hover:bg-error-container/40 transition-colors flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-[18px]">block</span>
+                                Reject
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-sm pb-safe bg-surface dark:bg-primary border-t border-outline-variant dark:border-outline shadow-lg md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed scale-95 active:opacity-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-xl px-4 py-1 scale-95 active:opacity-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="font-label-sm text-label-sm font-bold">Claims</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:text-secondary dark:hover:text-secondary-fixed scale-95 active:opacity-90 transition-transform" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</a>
+</nav>
+</body></html>

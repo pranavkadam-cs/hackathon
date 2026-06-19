@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClaimVerify — Client Portal</title>
+<meta name="description" content="Submit and track your insurance damage claims with AI-powered verification."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+/* ── Design tokens ── */
+:root {
+  --bg: #0a0e1a;
+  --bg-subtle: #111827;
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.07);
+  --surface-active: rgba(255,255,255,0.1);
+  --glass: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.1);
+  --glass-strong: rgba(255,255,255,0.1);
+  --text: #f0f2f5;
+  --text-muted: #8b95a8;
+  --text-dim: #5a6478;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.15);
+  --accent-glow: rgba(99,102,241,0.4);
+  --success: #10b981;
+  --success-bg: rgba(16,185,129,0.12);
+  --error: #ef4444;
+  --error-bg: rgba(239,68,68,0.12);
+  --warn: #f59e0b;
+  --warn-bg: rgba(245,158,11,0.12);
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --transition: 200ms cubic-bezier(.4,0,.2,1);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 40px rgba(99,102,241,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* ── Animated background ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,0.08), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(168,85,247,0.06), transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(59,130,246,0.04), transparent 40%);
+  pointer-events: none;
+}
+
+.ms { font-family: 'Material Symbols Outlined'; font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24; font-style: normal; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes slideUp { from { transform:translateY(100%); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes typing { 0% { opacity:.2; } 20% { opacity:1; } 100% { opacity:.2; } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+@keyframes popIn { 0% { transform:scale(.85); opacity:0; } 100% { transform:scale(1); opacity:1; } }
+@keyframes float { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(-6px); } }
+
+.fade-up { animation: fadeUp 400ms both; }
+.pop-in { animation: popIn 300ms cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ── Glass card ── */
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition);
+}
+.glass-card:hover {
+  background: var(--surface-hover);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: var(--shadow);
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 24px; border-radius: var(--radius); border: none;
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all var(--transition);
+  position: relative; overflow: hidden;
+}
+.btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0; transition: opacity var(--transition);
+}
+.btn:hover::after { opacity: 1; }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--accent-glow); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled {
+  opacity: 0.4; cursor: not-allowed; transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-ghost {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--glass-border);
+}
+.btn-ghost:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.2); }
+
+/* ── Inputs ── */
+.input-field {
+  width: 100%; padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+  transition: all var(--transition);
+  outline: none;
+}
+.input-field::placeholder { color: var(--text-dim); }
+.input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+textarea.input-field { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.input-label {
+  display: block; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-muted); margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Select ── */
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: 'expand_more'; font-family: 'Material Symbols Outlined';
+  font-variation-settings:'FILL' 1; position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 20px;
+}
+select.input-field {
+  appearance: none; -webkit-appearance: none;
+  padding-right: 40px; cursor: pointer;
+}
+select.input-field option { background: var(--bg-subtle); color: var(--text); }
+
+/* ── Header ── */
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(10,14,26,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0 20px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.header-logo .icon-box {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+.header-logo h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; }
+.header-logo .tag {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace;
+  color: var(--accent); background: var(--accent-soft);
+  padding: 2px 8px; border-radius: 999px; font-weight: 600;
+}
+
+/* ── Main layout ── */
+.main-container {
+  max-width: 680px; margin: 0 auto;
+  padding: 24px 16px 120px;
+  position: relative; z-index: 1;
+}
+
+/* ── Steps indicator ── */
+.steps-bar {
+  display: flex; align-items: center; gap: 0;
+  padding: 16px 0 24px;
+}
+.step-item {
+  display: flex; align-items: center; gap: 8px; flex: 1;
+  position: relative;
+}
+.step-item:not(:last-child)::after {
+  content: '';
+  flex: 1; height: 2px;
+  background: var(--glass-border);
+  margin: 0 8px;
+  transition: background 500ms;
+}
+.step-item:not(:last-child).done::after {
+  background: var(--accent);
+}
+.step-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-dim);
+  transition: all 400ms;
+  flex-shrink: 0;
+}
+.step-item.active .step-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.step-item.done .step-dot {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.step-name {
+  font-size: 11px; font-weight: 500; color: var(--text-dim);
+  white-space: nowrap; transition: color var(--transition);
+  display: none;
+}
+@media (min-width: 500px) {
+  .step-name { display: block; }
+}
+.step-item.active .step-name { color: var(--text); }
+.step-item.done .step-name { color: var(--success); }
+
+/* ── Panels ── */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp 400ms both; }
+
+/* ── Section headers ── */
+.section-title {
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, var(--text), var(--text-muted));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.section-subtitle {
+  font-size: 14px; color: var(--text-muted); line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+/* ── Object type cards ── */
+.obj-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.obj-card {
+  background: var(--surface);
+  border: 2px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 16px 10px; text-align: center;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.obj-card:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.2); transform: translateY(-2px); }
+.obj-card.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+.obj-card .ms { font-size: 32px; color: var(--text-muted); transition: color var(--transition); }
+.obj-card.selected .ms { color: var(--accent); }
+.obj-card span:last-child { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: capitalize; }
+.obj-card.selected span:last-child { color: var(--accent); }
+
+/* ── Chat ── */
+.chat-container {
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  height: 440px;
+}
+.chat-header {
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex; align-items: center; gap: 10px;
+}
+.chat-header .ai-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+.chat-header .ai-info { flex: 1; }
+.chat-header .ai-info .name { font-size: 13px; font-weight: 600; }
+.chat-header .ai-info .status {
+  font-size: 11px; color: var(--success);
+  display: flex; align-items: center; gap: 4px;
+}
+.chat-header .ai-info .status::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+}
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.msg {
+  max-width: 85%; padding: 10px 14px;
+  border-radius: 14px; font-size: 14px; line-height: 1.6;
+  animation: popIn 300ms both;
+}
+.msg-ai {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+.msg-user {
+  background: linear-gradient(135deg, var(--accent), #7c3aed);
+  color: #fff; align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.typing-indicator {
+  display: flex; gap: 4px; padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px; border-bottom-left-radius: 4px;
+  align-self: flex-start; width: fit-content;
+}
+.typing-indicator span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted);
+  animation: typing 1.4s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+.chat-input-bar {
+  padding: 12px; border-top: 1px solid var(--glass-border);
+  display: flex; gap: 8px; align-items: flex-end;
+  background: rgba(255,255,255,0.02);
+}
+.chat-input-bar textarea {
+  flex: 1; padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 12px; resize: none; min-height: 42px; max-height: 100px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
+  outline: none; transition: border-color var(--transition);
+  line-height: 1.5;
+}
+.chat-input-bar textarea::placeholder { color: var(--text-dim); }
+.chat-input-bar textarea:focus { border-color: var(--accent); }
+.chat-send {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.chat-send:hover { transform: scale(1.05); box-shadow: 0 4px 16px var(--accent-glow); }
+.chat-send:disabled { opacity: 0.3; cursor: not-allowed; transform: none !important; }
+
+/* ── Upload zone ── */
+.upload-zone {
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 20px; text-align: center;
+  transition: all var(--transition);
+  cursor: pointer;
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.upload-zone .ms { font-size: 48px; color: var(--text-dim); margin-bottom: 8px; }
+.upload-zone.dragover .ms { color: var(--accent); animation: float 1.5s ease-in-out infinite; }
+.upload-zone p { font-size: 14px; color: var(--text-muted); }
+.upload-zone .hint { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+
+.preview-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px; margin-top: 16px;
+}
+.preview-item {
+  position: relative; border-radius: var(--radius);
+  overflow: hidden; aspect-ratio: 1; background: var(--surface);
+  border: 1px solid var(--glass-border);
+  animation: popIn 300ms both;
+}
+.preview-item img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.preview-remove {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,0.7); color: #fff;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: background var(--transition);
+}
+.preview-remove:hover { background: var(--error); }
+
+/* ── Verdict panel ── */
+.verdict-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.verdict-card::before {
+  content: ''; position: absolute; inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6, #ec4899, var(--accent));
+  background-size: 300% 300%;
+  animation: gradientShift 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+}
+
+.verdict-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 36px;
+  animation: popIn 500ms cubic-bezier(.34,1.56,.64,1) 200ms both;
+}
+.verdict-icon.supported { background: var(--success-bg); color: var(--success); }
+.verdict-icon.contradicted { background: var(--error-bg); color: var(--error); }
+.verdict-icon.not_enough_information { background: var(--warn-bg); color: var(--warn); }
+
+.verdict-status {
+  font-size: 24px; font-weight: 700; margin-bottom: 6px;
+  animation: fadeUp 400ms 300ms both;
+}
+.verdict-status.supported { color: var(--success); }
+.verdict-status.contradicted { color: var(--error); }
+.verdict-status.not_enough_information { color: var(--warn); }
+
+.verdict-detail {
+  font-size: 14px; color: var(--text-muted); line-height: 1.6;
+  margin-bottom: 20px;
+  animation: fadeUp 400ms 400ms both;
+}
+
+.verdict-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  text-align: left; animation: fadeUp 400ms 500ms both;
+}
+.verdict-stat {
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 12px;
+}
+.verdict-stat .label {
+  font-size: 10px; font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-dim); margin-bottom: 4px;
+}
+.verdict-stat .value { font-size: 14px; font-weight: 600; text-transform: capitalize; }
+
+.verdict-risk {
+  margin-top: 16px; animation: fadeUp 400ms 600ms both;
+}
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+  margin: 3px;
+}
+.risk-badge.warn { background: var(--warn-bg); color: var(--warn); }
+.risk-badge.error { background: var(--error-bg); color: var(--error); }
+.risk-badge.ok { background: var(--success-bg); color: var(--success); }
+
+/* ── Processing spinner ── */
+.processing-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(10,14,26,0.92);
+  backdrop-filter: blur(8px);
+  flex-direction: column; align-items: center; justify-content: center;
+  gap: 16px;
+}
+.processing-overlay.active { display: flex; }
+.processing-spinner {
+  width: 56px; height: 56px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.processing-text { font-size: 16px; font-weight: 600; }
+.processing-sub { font-size: 13px; color: var(--text-muted); }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 300; pointer-events: none; opacity: 0; transition: opacity 200ms;
+}
+.toast-inner {
+  background: rgba(30,41,59,0.95);
+  backdrop-filter: blur(12px);
+  color: #fff; font-size: 13px; padding: 10px 20px;
+  border-radius: 999px; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Back to dashboard link ── */
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-muted);
+  text-decoration: none; transition: color var(--transition);
+}
+.back-link:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-logo">
+    <div class="icon-box">
+      <span class="ms" style="color:#fff;font-size:18px;">shield</span>
+    </div>
+    <div>
+      <h1>ClaimVerify</h1>
+    </div>
+    <span class="tag">CLIENT PORTAL</span>
+  </div>
+  <a href="/" class="back-link">
+    <span class="ms" style="font-size:16px;">arrow_back</span>
+    Dashboard
+  </a>
+</header>
+
+<div class="main-container">
+
+  <!-- Steps bar -->
+  <div class="steps-bar" id="steps-bar">
+    <div class="step-item active" id="step-1">
+      <div class="step-dot">1</div>
+      <span class="step-name">Register</span>
+    </div>
+    <div class="step-item" id="step-2">
+      <div class="step-dot">2</div>
+      <span class="step-name">Chat with AI</span>
+    </div>
+    <div class="step-item" id="step-3">
+      <div class="step-dot">3</div>
+      <span class="step-name">Upload</span>
+    </div>
+    <div class="step-item" id="step-4">
+      <div class="step-dot">4</div>
+      <span class="step-name">Verdict</span>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 1: REGISTER ═══════ -->
+  <div class="panel active" id="panel-register">
+    <h2 class="section-title">New Claim Submission</h2>
+    <p class="section-subtitle">Tell us about yourself and what you'd like to claim. Our AI assistant will guide you through the process.</p>
+
+    <div class="glass-card" style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <label class="input-label" for="client-name">Your Name / Client ID</label>
+        <input class="input-field" id="client-name" type="text" placeholder="e.g. John Doe or client_042" autocomplete="off"/>
+      </div>
+
+      <div>
+        <label class="input-label">What are you claiming damage for?</label>
+        <div class="obj-cards">
+          <div class="obj-card" onclick="selectObject('car')" id="obj-car">
+            <span class="ms">directions_car</span>
+            <span>Car</span>
+          </div>
+          <div class="obj-card" onclick="selectObject('laptop')" id="obj-laptop">
+            <span class="ms">laptop</span>
+            <span>Laptop</span>
+          </div>
+          <div class="obj-card" onclick="selectObject('package')" id="obj-package">
+            <span class="ms">inventory_2</span>
+            <span>Package</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="input-label" for="client-desc">Briefly describe the damage</label>
+        <textarea class="input-field" id="client-desc" placeholder="e.g. My car's rear bumper got dented in a parking lot accident..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" id="btn-start-chat" onclick="startChat()" style="width:100%;">
+        <span class="ms" style="font-size:18px;">chat</span>
+        Continue — Chat with AI
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 2: CHAT ═══════ -->
+  <div class="panel" id="panel-chat">
+    <h2 class="section-title">Describe Your Claim</h2>
+    <p class="section-subtitle">Our AI assistant will ask follow-up questions to understand your claim better.</p>
+
+    <div class="chat-container" id="chat-container">
+      <div class="chat-header">
+        <div class="ai-avatar">
+          <span class="ms" style="color:#fff;font-size:16px;">smart_toy</span>
+        </div>
+        <div class="ai-info">
+          <div class="name">ClaimVerify AI</div>
+          <div class="status">Online</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-bar">
+        <textarea id="chat-input" placeholder="Type your message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+        <button class="chat-send" id="chat-send-btn" onclick="sendMessage()">
+          <span class="ms" style="font-size:20px;">send</span>
+        </button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="goToStep(1)" style="flex:1;">
+        <span class="ms" style="font-size:16px;">arrow_back</span> Back
+      </button>
+      <button class="btn btn-primary" onclick="goToStep(3)" style="flex:2;" id="btn-to-upload">
+        Upload Evidence Photos <span class="ms" style="font-size:16px;">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 3: UPLOAD ═══════ -->
+  <div class="panel" id="panel-upload">
+    <h2 class="section-title">Upload Evidence Photos</h2>
+    <p class="section-subtitle">Upload clear photos of the damage. Multiple photos from different angles help our AI make a better assessment.</p>
+
+    <div class="upload-zone" id="upload-zone"
+         onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault();this.classList.add('dragover')"
+         ondragleave="this.classList.remove('dragover')"
+         ondrop="handleDrop(event)">
+      <span class="ms">cloud_upload</span>
+      <p>Drag & drop photos here or click to browse</p>
+      <p class="hint">JPG, PNG, WebP — Max 10 files</p>
+    </div>
+    <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFiles(this.files)"/>
+
+    <div class="preview-grid" id="preview-grid"></div>
+
+    <div style="display:flex;gap:8px;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="goToStep(2)" style="flex:1;">
+        <span class="ms" style="font-size:16px;">arrow_back</span> Back
+      </button>
+      <button class="btn btn-primary" id="btn-submit" onclick="submitClaim()" style="flex:2;" disabled>
+        <span class="ms" style="font-size:18px;">verified</span>
+        Submit Claim for Review
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════ STEP 4: VERDICT ═══════ -->
+  <div class="panel" id="panel-verdict">
+    <h2 class="section-title">Claim Verdict</h2>
+    <p class="section-subtitle">Our AI has reviewed your submission. Here's the assessment.</p>
+
+    <div class="verdict-card" id="verdict-card">
+      <div class="verdict-icon" id="v-icon">
+        <span class="ms" id="v-icon-ms">hourglass_empty</span>
+      </div>
+      <div class="verdict-status" id="v-status">Processing…</div>
+      <div class="verdict-detail" id="v-detail">Your claim is being analyzed by our AI.</div>
+
+      <div class="verdict-grid" id="v-grid">
+        <div class="verdict-stat">
+          <div class="label">Issue Type</div>
+          <div class="value" id="v-issue">—</div>
+        </div>
+        <div class="verdict-stat">
+          <div class="label">Object Part</div>
+          <div class="value" id="v-part">—</div>
+        </div>
+        <div class="verdict-stat">
+          <div class="label">Severity</div>
+          <div class="value" id="v-severity">—</div>
+        </div>
+        <div class="verdict-stat">
+          <div class="label">Valid Image</div>
+          <div class="value" id="v-valid">—</div>
+        </div>
+      </div>
+
+      <div class="verdict-risk" id="v-risk"></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:20px;">
+      <button class="btn btn-primary" onclick="resetPortal()" style="width:100%;">
+        <span class="ms" style="font-size:18px;">add_circle</span>
+        Submit Another Claim
+      </button>
+      <a href="/" class="btn btn-ghost" style="width:100%;text-decoration:none;">
+        <span class="ms" style="font-size:18px;">dashboard</span>
+        Go to Admin Dashboard
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- Processing overlay -->
+<div class="processing-overlay" id="processing-overlay">
+  <div class="processing-spinner"></div>
+  <div class="processing-text">Analyzing Your Claim…</div>
+  <div class="processing-sub">Our AI is reviewing your images and transcript</div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════ STATE ══════════════════
+let currentStep = 1;
+let selectedObject = '';
+let chatHistory = [];
+let uploadedFiles = [];
+let chatConversation = []; // for Gemini context
+
+// ══════════════════ STEPS ══════════════════
+function goToStep(n) {
+  // Validate before advancing
+  if (n === 2 && currentStep === 1) {
+    const name = document.getElementById('client-name').value.trim();
+    if (!name) { showToast('Please enter your name or client ID', 'warning'); return; }
+    if (!selectedObject) { showToast('Please select what you are claiming for', 'warning'); return; }
+    const desc = document.getElementById('client-desc').value.trim();
+    if (!desc) { showToast('Please describe the damage briefly', 'warning'); return; }
+  }
+
+  currentStep = n;
+  // Update step indicators
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('step-' + i);
+    el.classList.remove('active', 'done');
+    if (i === n) el.classList.add('active');
+    else if (i < n) el.classList.add('done');
+  }
+  // Update panels
+  ['register','chat','upload','verdict'].forEach((p, idx) => {
+    const panel = document.getElementById('panel-' + p);
+    panel.classList.toggle('active', (idx + 1) === n);
+  });
+}
+
+// ══════════════════ OBJECT SELECT ══════════════════
+function selectObject(type) {
+  selectedObject = type;
+  ['car','laptop','package'].forEach(t => {
+    document.getElementById('obj-' + t).classList.toggle('selected', t === type);
+  });
+}
+
+// ══════════════════ CHAT ══════════════════
+function startChat() {
+  const name = document.getElementById('client-name').value.trim();
+  if (!name) { showToast('Please enter your name or client ID', 'warning'); return; }
+  if (!selectedObject) { showToast('Please select what you are claiming for', 'warning'); return; }
+  const desc = document.getElementById('client-desc').value.trim();
+  if (!desc) { showToast('Please describe the damage briefly', 'warning'); return; }
+
+  goToStep(2);
+
+  // Clear previous chat
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML = '';
+  chatHistory = [];
+  chatConversation = [];
+
+  // Initial AI greeting
+  const greeting = `Hi ${name}! 👋 I'm the ClaimVerify AI assistant. I see you'd like to file a **${selectedObject}** damage claim.\n\nYou mentioned: *"${desc}"*\n\nLet me ask a few follow-up questions to help process your claim accurately. Can you tell me:\n\n1. **When did the damage occur?**\n2. **Which specific part is affected?**\n3. **Was anyone else involved (e.g. another vehicle, a delivery carrier)?**`;
+
+  addMessage('ai', greeting);
+  chatConversation.push({role: 'model', text: greeting});
+}
+
+function addMessage(type, text) {
+  const msgsEl = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${type === 'ai' ? 'ai' : 'user'}`;
+
+  // Basic markdown rendering
+  let html = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+  div.innerHTML = html;
+  msgsEl.appendChild(div);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  chatHistory.push({type, text});
+}
+
+function showTyping() {
+  const msgsEl = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'typing-indicator';
+  div.id = 'typing-ind';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  msgsEl.appendChild(div);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-ind');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addMessage('user', text);
+  chatConversation.push({role: 'user', text});
+
+  const sendBtn = document.getElementById('chat-send-btn');
+  sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        message: text,
+        claim_object: selectedObject,
+        client_name: document.getElementById('client-name').value.trim(),
+        description: document.getElementById('client-desc').value.trim(),
+        history: chatConversation.slice(0, -1) // don't include current msg twice
+      })
+    });
+    const data = await resp.json();
+    hideTyping();
+    addMessage('ai', data.reply || 'I apologize, I had trouble processing that. Could you rephrase?');
+    chatConversation.push({role: 'model', text: data.reply || ''});
+  } catch(e) {
+    hideTyping();
+    addMessage('ai', 'I\'m having connectivity issues. Please try again in a moment.');
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+// ══════════════════ FILE UPLOAD ══════════════════
+function handleDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+}
+
+function handleFiles(fileList) {
+  for (const file of fileList) {
+    if (!file.type.startsWith('image/')) continue;
+    if (uploadedFiles.length >= 10) { showToast('Maximum 10 images allowed', 'warning'); break; }
+    uploadedFiles.push(file);
+  }
+  renderPreviews();
+  document.getElementById('btn-submit').disabled = uploadedFiles.length === 0;
+}
+
+function removeFile(idx) {
+  uploadedFiles.splice(idx, 1);
+  renderPreviews();
+  document.getElementById('btn-submit').disabled = uploadedFiles.length === 0;
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = uploadedFiles.map((f, i) => {
+    const url = URL.createObjectURL(f);
+    return `<div class="preview-item" style="animation-delay:${i*50}ms">
+      <img src="${url}" alt="Upload ${i+1}"/>
+      <button class="preview-remove" onclick="event.stopPropagation();removeFile(${i})">
+        <span class="ms" style="font-size:14px;">close</span>
+      </button>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════ SUBMIT ══════════════════
+async function submitClaim() {
+  if (uploadedFiles.length === 0) {
+    showToast('Please upload at least one photo', 'warning');
+    return;
+  }
+
+  const overlay = document.getElementById('processing-overlay');
+  overlay.classList.add('active');
+
+  // Build the full claim transcript from chat
+  const transcript = chatHistory
+    .map(m => (m.type === 'user' ? 'Customer' : 'Support') + ': ' + m.text)
+    .join(' | ');
+
+  const name = document.getElementById('client-name').value.trim().replace(/\s+/g, '_');
+  const desc = document.getElementById('client-desc').value.trim();
+  const fullClaim = desc + (transcript ? ' | ' + transcript : '');
+
+  const formData = new FormData();
+  formData.append('user_id', name);
+  formData.append('user_claim', fullClaim);
+  formData.append('claim_object', selectedObject);
+  formData.append('history_summary', 'New client — submitted via client portal.');
+  uploadedFiles.forEach(f => formData.append('images', f));
+
+  try {
+    const resp = await fetch('/api/claims/new', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    overlay.classList.remove('active');
+    goToStep(4);
+    displayVerdict(data);
+  } catch(e) {
+    overlay.classList.remove('active');
+    showToast('Submission failed. Please try again.', 'error');
+  }
+}
+
+function displayVerdict(data) {
+  const pred = data.prediction || {};
+  const status = pred.claim_status || 'not_enough_information';
+
+  const statusMap = {
+    supported: { icon: 'check_circle', label: 'Claim Approved', color: 'supported' },
+    contradicted: { icon: 'cancel', label: 'Claim Rejected', color: 'contradicted' },
+    not_enough_information: { icon: 'help', label: 'More Info Needed', color: 'not_enough_information' },
+  };
+  const s = statusMap[status] || statusMap.not_enough_information;
+
+  const iconEl = document.getElementById('v-icon');
+  iconEl.className = 'verdict-icon ' + s.color;
+  document.getElementById('v-icon-ms').textContent = s.icon;
+  const statusEl = document.getElementById('v-status');
+  statusEl.textContent = s.label;
+  statusEl.className = 'verdict-status ' + s.color;
+
+  document.getElementById('v-detail').textContent =
+    pred.claim_status_justification || 'Our AI has completed the analysis of your submitted evidence.';
+
+  document.getElementById('v-issue').textContent =
+    (pred.issue_type || '—').replace(/_/g, ' ');
+  document.getElementById('v-part').textContent =
+    (pred.object_part || '—').replace(/_/g, ' ');
+  document.getElementById('v-severity').textContent = pred.severity || '—';
+
+  const validImg = pred.valid_image === 'true';
+  const validEl = document.getElementById('v-valid');
+  validEl.textContent = validImg ? '✓ Yes' : '✗ No';
+  validEl.style.color = validImg ? 'var(--success)' : 'var(--error)';
+
+  // Risk flags
+  const flags = (pred.risk_flags || 'none').split(';').filter(f => f && f !== 'none');
+  const riskEl = document.getElementById('v-risk');
+  if (flags.length) {
+    const errFlags = ['possible_manipulation','text_instruction_present','non_original_image','claim_mismatch'];
+    riskEl.innerHTML = '<div style="margin-bottom:8px;font-size:10px;font-family:\'JetBrains Mono\',monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);text-align:left;">Risk Flags</div>' +
+      flags.map(f => {
+        const cls = errFlags.includes(f) ? 'error' : 'warn';
+        return `<span class="risk-badge ${cls}">${f.replace(/_/g,' ')}</span>`;
+      }).join('');
+  } else {
+    riskEl.innerHTML = '<span class="risk-badge ok"><span class="ms" style="font-size:14px;">check</span> No risk flags</span>';
+  }
+}
+
+// ══════════════════ RESET ══════════════════
+function resetPortal() {
+  currentStep = 1;
+  selectedObject = '';
+  chatHistory = [];
+  chatConversation = [];
+  uploadedFiles = [];
+  document.getElementById('client-name').value = '';
+  document.getElementById('client-desc').value = '';
+  document.getElementById('preview-grid').innerHTML = '';
+  document.getElementById('chat-messages').innerHTML = '';
+  ['car','laptop','package'].forEach(t => {
+    document.getElementById('obj-' + t).classList.remove('selected');
+  });
+  document.getElementById('btn-submit').disabled = true;
+  goToStep(1);
+}
+
+// ══════════════════ TOAST ══════════════════
+let toastTimer;
+function showToast(msg, icon = 'info') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<div class="toast-inner"><span class="ms" style="font-size:16px;">${icon}</span>${msg}</div>`;
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// ══════════════════ AUTO-RESIZE TEXTAREA ══════════════════
+const chatInput = document.getElementById('chat-input');
+chatInput.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+</script>
+</body>
+</html>
